@@ -15,7 +15,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="dorms")
+@Table(name="Dorm")
 public class dorm {
     @Id
     @Column(name = "name", nullable = false, length = 25)
@@ -68,7 +68,7 @@ public class dorm {
 
     public List<student> getStudents() {
         return students;
-    }
+    } 
 
     public boolean addStudent(student student) {
         if (students.size() < capacity && student.getGender().equals(this.gender)) {

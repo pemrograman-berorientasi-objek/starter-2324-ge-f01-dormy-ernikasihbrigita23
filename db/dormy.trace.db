@@ -1,0 +1,9 @@
+2024-05-16 07:54:57 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "STUDENTS" not found (this database is empty); SQL statement:
+SELECT 1 FROM students [42104-212]
+2024-05-16 07:54:57 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "DORMS" not found; SQL statement:
+SELECT 1 FROM dorms [42102-212]
+2024-05-16 07:56:54 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "DORM" not found; SQL statement:
+SELECT 1 FROM dorm [42102-212]

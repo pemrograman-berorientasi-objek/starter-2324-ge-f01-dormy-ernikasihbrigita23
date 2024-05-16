@@ -12,7 +12,7 @@ package pbo.f01.model;
  import javax.persistence.ManyToOne;
  import javax.persistence.JoinColumn;
 
- @Entity
+ @Entity 
  @Table(name = "students")
  public class student {
      @Id

@@ -1,20 +1,22 @@
 package pbo.f01;
 
+
 /**
  * 12S22013 - Christoffel Theofani Napitupulu
  * 12S22047 - Erni Kasih B. Sarumaha
  */
 
-import pbo.f01.model.dorm;
-import pbo.f01.model.student;
+import pbo.f01.model.*;
 import javax.persistence.*; 
 import java.util.List;
 import java.util.Scanner;
 
 public class App {
-    private static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("dormsimulatorpu");
-        private static final EntityManager em = emf.createEntityManager();
+    private static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("dormy_pu");
+    private static final EntityManager em = emf.createEntityManager();
+    
     public static void main(String[] _args) {
+        cleanDb();
         Scanner scanner = new Scanner(System.in);
         String command;
 
@@ -29,6 +31,17 @@ public class App {
         scanner.close();
         em.close();
         emf.close();
+    }
+
+    private static void cleanDb() {
+        String[] jpqa = { "DELETE FROM student", "DELETE FROM dorm" };
+
+        for (String query : jpqa) {
+            em.getTransaction().begin();
+            em.createQuery(query).executeUpdate();
+            em.flush();
+            em.getTransaction().commit();
+        }
     }
 
     private static void processCommand(String command) {
@@ -57,19 +70,23 @@ public class App {
     }
 
     private static void addStudent(String command) {
-        String[] parts = command.split("#");
-        if (parts.length == 5) {
-            String id = parts[1];
-            String name = parts[2];
-            int year = Integer.parseInt(parts[3]);
-            String gender = parts[4];
+    String[] parts = command.split("#");
+    if (parts.length == 5) {
+        String id = parts[1];
+        String name = parts[2];
+        int year = Integer.parseInt(parts[3]);
+        String gender = parts[4];
 
+        // Check if student already exists
+        student existingStudent = em.find(student.class, id);
+        if (existingStudent == null) {
             em.getTransaction().begin();
             student student = new student(id, name, year, gender);
             em.persist(student);
             em.getTransaction().commit();
         }
     }
+}
 
     private static void assignStudent(String command) {
         String[] parts = command.split("#");
@@ -77,22 +94,24 @@ public class App {
             String studentId = parts[1];
             String dormName = parts[2];
 
-            em.getTransaction().begin();
             student student = em.find(student.class, studentId);
             dorm dorm = em.find(dorm.class, dormName);
-
-            if (student != null && dorm != null && dorm.addStudent(student)) {
-                em.persist(student);
+            
+            if (student != null && dorm != null && student.getGender().equals(dorm.getGender()) && dorm.getCapacity() > dorm.getStudents().size()) {
+                em.getTransaction().begin();
+                dorm.getStudents().add(student);
+                em.merge(dorm);
+                em.merge(student);
+                em.flush();
                 em.getTransaction().commit();
-            } else {
-                em.getTransaction().rollback();
-            }
+            } 
         }
     }
 
     private static void displayAll() {
-        TypedQuery<dorm> query = em.createQuery("SELECT d FROM Dorm d ORDER BY d.name", dorm.class);
-        List<dorm> dorms = query.getResultList();
+        String query = "SELECT d FROM dorm d ORDER BY d.name";
+        em.getTransaction().begin();
+        List<dorm> dorms =  em.createQuery(query, dorm.class).getResultList();
 
         for (dorm dorm : dorms) {
             System.out.printf("%s|%s|%d|%d%n", dorm.getName(), dorm.getGender(), dorm.getCapacity(),
